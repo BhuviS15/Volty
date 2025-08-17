@@ -48,7 +48,7 @@ export class NotificationService {
       await Notifications.scheduleNotificationAsync({
         content: {
           title: '⚡ Low Electricity Price Alert!',
-          body: `Current price: $${price.toFixed(2)}/kWh - Great time to use electricity!`,
+          body: `Current price: ${price.toFixed(1)}¢/kWh - Great time to use electricity!`,
           data: { price, timestamp: new Date().toISOString() },
         },
         trigger: null, // Send immediately

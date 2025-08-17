@@ -1,68 +1,39 @@
-import * as TaskManager from 'expo-task-manager';
-import * as BackgroundFetch from 'expo-background-fetch';
 import { ElectricityPriceService } from './electricityPriceService';
 import { NotificationService } from './notificationService';
 
-const BACKGROUND_FETCH_TASK = 'background-fetch-electricity-prices';
-
 export class BackgroundTaskService {
-  static async registerBackgroundTask(): Promise<void> {
+  private static monitoringInterval: NodeJS.Timeout | null = null;
+  private static isMonitoring = false;
+
+  static async startPeriodicPriceCheck(): Promise<void> {
     try {
-      // Define the background task
-      TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+      if (this.isMonitoring) {
+        console.log('Monitoring already active');
+        return;
+      }
+
+      // Configure notifications first
+      await NotificationService.configurePushNotifications();
+      
+      // Start monitoring with a timer (every 15 minutes)
+      this.monitoringInterval = setInterval(async () => {
         try {
-          console.log('Background task: Checking electricity prices...');
+          console.log('Timer-based check: Checking electricity prices...');
           
           const priceData = await ElectricityPriceService.fetchCurrentPrice();
           
           if (priceData && priceData.isUnderThreshold) {
             // Send notification for low price
             await NotificationService.sendLowPriceNotification(priceData.price);
-            console.log(`Background task: Low price detected! ${priceData.price} cents/kWh`);
+            console.log(`Timer-based check: Low price detected! ${priceData.price} cents/kWh`);
           }
-          
-          return BackgroundFetch.Result.NewData;
         } catch (error) {
-          console.error('Background task error:', error);
-          return BackgroundFetch.Result.Failed;
+          console.error('Timer-based check error:', error);
         }
-      });
+      }, 15 * 60 * 1000); // 15 minutes
 
-      // Register the background fetch task
-      await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-        minimumInterval: 15 * 60, // 15 minutes minimum
-        stopOnTerminate: false,
-        startOnBoot: true,
-      });
-
-      console.log('Background task registered successfully');
-    } catch (error) {
-      console.error('Failed to register background task:', error);
-    }
-  }
-
-  static async unregisterBackgroundTask(): Promise<void> {
-    try {
-      await BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-      console.log('Background task unregistered successfully');
-    } catch (error) {
-      console.error('Failed to unregister background task:', error);
-    }
-  }
-
-  static async getBackgroundFetchStatus(): Promise<BackgroundFetch.BackgroundFetchStatus> {
-    return await BackgroundFetch.getStatusAsync();
-  }
-
-  static async startPeriodicPriceCheck(): Promise<void> {
-    try {
-      // Set up background task
-      await this.registerBackgroundTask();
-      
-      // Also set up periodic notifications as a fallback
-      await NotificationService.schedulePeriodicCheck();
-      
-      console.log('Periodic price checking started');
+      this.isMonitoring = true;
+      console.log('Periodic price checking started (timer-based)');
     } catch (error) {
       console.error('Failed to start periodic price checking:', error);
     }
@@ -70,11 +41,25 @@ export class BackgroundTaskService {
 
   static async stopPeriodicPriceCheck(): Promise<void> {
     try {
-      await this.unregisterBackgroundTask();
-      await NotificationService.cancelAllNotifications();
+      if (this.monitoringInterval) {
+        clearInterval(this.monitoringInterval);
+        this.monitoringInterval = null;
+      }
+      
+      this.isMonitoring = false;
       console.log('Periodic price checking stopped');
     } catch (error) {
       console.error('Failed to stop periodic price checking:', error);
     }
   }
+
+  static getBackgroundFetchStatus(): string {
+    // Since we're not using expo-background-fetch, return a status
+    return this.isMonitoring ? 'Active' : 'Inactive';
+  }
+
+  static isCurrentlyMonitoring(): boolean {
+    return this.isMonitoring;
+  }
 }
+

@@ -55,7 +55,7 @@ export class ElectricityPriceService {
   }
 
   static formatPrice(price: number): string {
-    return `$${price.toFixed(2)}/kWh`;
+    return `${price.toFixed(1)}¢/kWh`;
   }
 
   static formatTimestamp(timestamp: Date): string {

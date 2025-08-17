@@ -51,7 +51,7 @@ export const PriceDisplay: React.FC<PriceDisplayProps> = ({
       
       <View style={styles.thresholdInfo}>
         <Text style={styles.thresholdText}>
-          Threshold: $8.00/kWh
+          Threshold: 8¢/kWh
         </Text>
         <Text style={styles.thresholdDescription}>
           {isUnderThreshold 

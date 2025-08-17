@@ -54,9 +54,6 @@ export const useElectricityPriceMonitor = (): UseElectricityPriceMonitorReturn =
 
   const startMonitoring = useCallback(async () => {
     try {
-      // Configure notifications first
-      await NotificationService.configurePushNotifications();
-      
       // Start background task
       await BackgroundTaskService.startPeriodicPriceCheck();
       
@@ -90,13 +87,9 @@ export const useElectricityPriceMonitor = (): UseElectricityPriceMonitorReturn =
 
   // Check background task status
   useEffect(() => {
-    const checkBackgroundTaskStatus = async () => {
-      try {
-        const status = await BackgroundTaskService.getBackgroundFetchStatus();
-        setBackgroundTaskStatus(status);
-      } catch (err) {
-        setBackgroundTaskStatus('Error');
-      }
+    const checkBackgroundTaskStatus = () => {
+      const status = BackgroundTaskService.getBackgroundFetchStatus();
+      setBackgroundTaskStatus(status);
     };
 
     checkBackgroundTaskStatus();

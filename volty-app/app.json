@@ -11,10 +11,6 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": [
-          "background-fetch",
-          "background-processing"
-        ],
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
         }
@@ -27,9 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
-        "android.permission.INTERNET",
-        "android.permission.WAKE_LOCK",
-        "android.permission.RECEIVE_BOOT_COMPLETED"
+        "android.permission.INTERNET"
       ]
     },
     "web": {
@@ -52,8 +46,7 @@
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",
-          "color": "#ffffff",
-          "sounds": ["./assets/sounds/notification.wav"]
+          "color": "#ffffff"
         }
       ]
     ],
