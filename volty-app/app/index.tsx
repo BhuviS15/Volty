@@ -12,7 +12,33 @@ import { useElectricityPriceMonitor } from './hooks/useElectricityPriceMonitor';
 import { PriceDisplay } from './components/PriceDisplay';
 import { ControlPanel } from './components/ControlPanel';
 
+/**
+ * Main App component for the Volty electricity price monitoring application.
+ * 
+ * This is the root component that orchestrates the entire electricity price monitoring
+ * system. It uses the useElectricityPriceMonitor hook to manage state and provides
+ * a user interface for viewing current prices and controlling monitoring functionality.
+ * 
+ * Features:
+ * - Real-time electricity price display
+ * - Background monitoring controls
+ * - Push notification management
+ * - Error handling with user alerts
+ * - Responsive design for mobile devices
+ * 
+ * The app integrates with ComEd's Hourly Pricing API to fetch current electricity
+ * prices and provides notifications when prices drop below 8 cents per kWh.
+ * 
+ * @returns React component representing the main app interface
+ * 
+ * @example
+ * ```typescript
+ * // This component is automatically rendered by Expo Router
+ * // No manual instantiation required
+ * ```
+ */
 export default function App() {
+  // Use the custom hook to manage electricity price monitoring
   const {
     currentPrice,
     isLoading,
@@ -25,13 +51,26 @@ export default function App() {
     toggleMonitoring,
   } = useElectricityPriceMonitor();
 
-  // Show error alerts
+  /**
+   * Effect hook to display error alerts to the user.
+   * 
+   * Monitors the error state and shows an alert dialog when an error occurs.
+   * This provides user feedback for any issues with price fetching or monitoring.
+   */
   useEffect(() => {
     if (error) {
       Alert.alert('Error', error, [{ text: 'OK' }]);
     }
   }, [error]);
 
+  /**
+   * Handler function for toggling monitoring state.
+   * 
+   * Wraps the toggleMonitoring function with error handling to provide
+   * user feedback if the operation fails.
+   * 
+   * @returns Promise that resolves when the toggle operation is complete
+   */
   const handleToggleMonitoring = async () => {
     try {
       await toggleMonitoring();
@@ -40,6 +79,14 @@ export default function App() {
     }
   };
 
+  /**
+   * Handler function for manually refreshing price data.
+   * 
+   * Wraps the refreshPrice function with error handling to provide
+   * user feedback if the operation fails.
+   * 
+   * @returns Promise that resolves when the refresh operation is complete
+   */
   const handleRefreshPrice = async () => {
     try {
       await refreshPrice();
@@ -53,11 +100,13 @@ export default function App() {
       <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* App Header */}
         <View style={styles.header}>
           <Text style={styles.title}>⚡ Volty</Text>
           <Text style={styles.subtitle}>Electricity Price Monitor</Text>
         </View>
 
+        {/* Price Display Section */}
         {currentPrice ? (
           <PriceDisplay
             price={currentPrice.price}
@@ -76,6 +125,7 @@ export default function App() {
           </View>
         )}
 
+        {/* Control Panel Section */}
         <ControlPanel
           isMonitoring={isMonitoring}
           backgroundTaskStatus={backgroundTaskStatus}
@@ -84,6 +134,7 @@ export default function App() {
           isLoading={isLoading}
         />
 
+        {/* App Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             Data provided by ComEd Hourly Pricing
@@ -97,6 +148,16 @@ export default function App() {
   );
 }
 
+/**
+ * Styles for the main App component.
+ * 
+ * Provides responsive styling with:
+ * - Safe area handling for different device types
+ * - Scrollable layout for content overflow
+ * - Typography hierarchy for app branding
+ * - Loading and error state styling
+ * - Footer information styling
+ */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
